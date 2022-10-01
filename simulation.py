@@ -1,8 +1,4 @@
 import random
-import PIL
-import numpy
-from PIL import Image
-import cv2
 
 
 class Crystal:
@@ -55,28 +51,45 @@ def calculate_growth_order(crystals):
     return order
 
 
+def sprinkle_cristals(crystal_map, amount):
+    cr_map = crystal_map
+    size_x = len(crystal_map)
+    size_y = len(crystal_map[0])
+    for i in range(amount):
+        x, y = random.randint(0, size_x), random.randint(0, size_y)
+        while cr_map[x][y] != -1:
+            x, y = random.randint(0, size_x), random.randint(0, size_y)
+        cr_map[x][y] = i
+    return cr_map
+
+
 def grow(index, crystal_map):
     pass
 
 
 def simulate(size_x=500, size_y=500, crystal_amount=50):
     crystal_map = mk_matrix(size_x, size_y, -1)
-    image = PIL.Image.new("1", (500, 500), 0)
 
     crystals = mk_crystals(crystal_amount)
     growth_order = calculate_growth_order(crystals)
 
+    crystal_map = sprinkle_cristals(crystal_map, crystal_amount)
+    print(crystal_map)
+
     for i in range(100):
-        t = growth_order[0]["time"]
+        current_time = growth_order[0]["time"]
+        current_crystal_index = growth_order[0]["crystal_index"]
+        current_direction = growth_order[0]["direction"]
         current_action = growth_order[0]
+
         del growth_order[0]
         grow(current_action["crystal_index"], crystal_map)
 
-        new_action = current_action
-        new_action["time"] = crystals[current_action["crystal_index"]].get_value(current_action["direction"])
         for e in range(len(growth_order)):
-            growth_order[e]["time"] = growth_order[e]["time"] - t
+            growth_order[e]["time"] = growth_order[e]["time"] - current_time
 
+        new_action = current_action
+        new_action["time"] = crystals[current_crystal_index].get_value(current_direction)
         readded = False
         e = 0
         while not readded and e < len(growth_order):
