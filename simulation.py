@@ -58,7 +58,7 @@ def calculate_growth_order(crystals):
         order.append({"time": crystal.get_value("right"), "direction": "right", "crystal_index": i})
         order.append({"time": crystal.get_value("down"), "direction": "down", "crystal_index": i})
         order.append({"time": crystal.get_value("left"), "direction": "left", "crystal_index": i})
-    order.sort(key=sort_evaluator)
+    sorted(order, key=lambda x: x["time"])
     return order
 
 
@@ -74,8 +74,15 @@ def sprinkle_cristals(crystal_map, amount):
     return new_map
 
 
-def grow(index, direction, crystal_map):
-    new_map = copy.deepcopy(crystal_map)
+def grow(index, direction, crystal_map: []):
+    # new_map = copy.deepcopy(crystal_map)
+    # new_map = crystal_map
+    new_map = []
+    for x in range(len(crystal_map)):
+        new_map.append([])
+        for y in range(len(crystal_map[0])):
+            new_map[x].append(crystal_map[x][y])
+
     offset_x, offset_y = 0, 0
     if direction == "up":
         offset_x, offset_y = 0, 1
@@ -97,7 +104,7 @@ def grow(index, direction, crystal_map):
     return new_map
 
 
-def simulate(size_x=500, size_y=500, crystal_amount=50):
+def simulate(size_x=500, size_y=500, crystal_amount=50, iterations=1000):
     crystal_map = mk_matrix(size_x, size_y, -1)
 
     crystals = mk_crystals(crystal_amount)
@@ -105,7 +112,7 @@ def simulate(size_x=500, size_y=500, crystal_amount=50):
 
     crystal_map = sprinkle_cristals(crystal_map, crystal_amount)
 
-    for i in range(10000):
+    for i in range(iterations):
         current_time = growth_order[0]["time"]
         current_crystal_index = growth_order[0]["crystal_index"]
         current_direction = growth_order[0]["direction"]
@@ -129,6 +136,10 @@ def simulate(size_x=500, size_y=500, crystal_amount=50):
         if not readded:
             growth_order.append(new_action)
 
+        sorted(growth_order, key=lambda x: x["time"])
+
+        print(str(round((i / iterations) * 100 * 10) / 10) + "%")
+
     img = Image.new('RGB', (size_x, size_y), "black")
     pixels = img.load()
     for f in range(img.size[0]):
@@ -139,4 +150,4 @@ def simulate(size_x=500, size_y=500, crystal_amount=50):
 
 
 if __name__ == "__main__":
-    simulate(size_x=500, size_y=500, crystal_amount=50)
+    simulate(size_x=500, size_y=500, crystal_amount=50, iterations=10000)
