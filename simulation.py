@@ -1,4 +1,6 @@
+import copy
 import random
+from PIL import Image
 
 
 class Crystal:
@@ -18,6 +20,15 @@ class Crystal:
             return self.down_time
         elif direction == "left":
             return self.left_time
+
+
+def clamp(value, low, high):
+    if value >= high:
+        return high
+    elif value <= low:
+        return low
+    else:
+        return value
 
 
 def mk_matrix(size_x, size_y, init=-1):
@@ -52,19 +63,38 @@ def calculate_growth_order(crystals):
 
 
 def sprinkle_cristals(crystal_map, amount):
-    cr_map = crystal_map
-    size_x = len(crystal_map)
-    size_y = len(crystal_map[0])
+    new_map = crystal_map
+    size_x = len(crystal_map) - 1
+    size_y = len(crystal_map[0]) - 1
     for i in range(amount):
         x, y = random.randint(0, size_x), random.randint(0, size_y)
-        while cr_map[x][y] != -1:
+        while new_map[x][y] != -1:
             x, y = random.randint(0, size_x), random.randint(0, size_y)
-        cr_map[x][y] = i
-    return cr_map
+        new_map[x][y] = i
+    return new_map
 
 
-def grow(index, crystal_map):
-    pass
+def grow(index, direction, crystal_map):
+    new_map = copy.deepcopy(crystal_map)
+    offset_x, offset_y = 0, 0
+    if direction == "up":
+        offset_x, offset_y = 0, 1
+    elif direction == "right":
+        offset_x, offset_y = 1, 0
+    elif direction == "down":
+        offset_x, offset_y = 0, -1
+    elif direction == "left":
+        offset_x, offset_y = -1, 0
+
+    size_x = len(crystal_map)
+    size_y = len(crystal_map[0])
+    for row, x in zip(crystal_map, range(size_x)):
+        for item, y in zip(row, range(size_y)):
+            if item == index:
+                check_x, check_y = clamp(x + offset_x, 0, size_x - 1), clamp(y + offset_y, 0, size_y - 1)
+                if crystal_map[check_x][check_y] == -1:
+                    new_map[check_x][check_y] = index
+    return new_map
 
 
 def simulate(size_x=500, size_y=500, crystal_amount=50):
@@ -74,16 +104,15 @@ def simulate(size_x=500, size_y=500, crystal_amount=50):
     growth_order = calculate_growth_order(crystals)
 
     crystal_map = sprinkle_cristals(crystal_map, crystal_amount)
-    print(crystal_map)
 
-    for i in range(100):
+    for i in range(10000):
         current_time = growth_order[0]["time"]
         current_crystal_index = growth_order[0]["crystal_index"]
         current_direction = growth_order[0]["direction"]
         current_action = growth_order[0]
 
         del growth_order[0]
-        grow(current_action["crystal_index"], crystal_map)
+        crystal_map = grow(current_action["crystal_index"], current_direction, crystal_map)
 
         for e in range(len(growth_order)):
             growth_order[e]["time"] = growth_order[e]["time"] - current_time
@@ -94,11 +123,19 @@ def simulate(size_x=500, size_y=500, crystal_amount=50):
         e = 0
         while not readded and e < len(growth_order):
             if growth_order[e]["time"] > new_action["time"]:
-                growth_order.append(new_action)
+                growth_order.insert(e - 1, new_action)
                 readded = True
             e += 1
         if not readded:
             growth_order.append(new_action)
+
+    img = Image.new('RGB', (size_x, size_y), "black")
+    pixels = img.load()
+    for f in range(img.size[0]):
+        for j in range(img.size[1]):
+            v = clamp(crystal_map[f - 1][j - 1] * 5, 0, 255)
+            pixels[f, j] = (v, v, v)
+    img.save("test" + str(0) + ".png")
 
 
 if __name__ == "__main__":
