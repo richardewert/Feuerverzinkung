@@ -113,29 +113,17 @@ def simulate(size_x=500, size_y=500, crystal_amount=50, iterations=1000):
     crystal_map = sprinkle_cristals(crystal_map, crystal_amount)
 
     for i in range(iterations):
-        current_time = growth_order[0]["time"]
-        current_crystal_index = growth_order[0]["crystal_index"]
-        current_direction = growth_order[0]["direction"]
-        current_action = growth_order[0]
+        # Wachstumsaktion durchführen
+        crystal_map = grow(growth_order[0]["crystal_index"], growth_order[0]["direction"], crystal_map)
 
-        del growth_order[0]
-        crystal_map = grow(current_action["crystal_index"], current_direction, crystal_map)
-
+        # Zeit aktueller Aktion von allen anderen abziehen
         for e in range(len(growth_order)):
-            growth_order[e]["time"] = growth_order[e]["time"] - current_time
+            growth_order[e]["time"] = growth_order[e]["time"] - growth_order[0]["time"]
 
-        new_action = current_action
-        new_action["time"] = crystals[current_crystal_index].get_value(current_direction)
-        readded = False
-        e = 0
-        while not readded and e < len(growth_order):
-            if growth_order[e]["time"] > new_action["time"]:
-                growth_order.insert(e - 1, new_action)
-                readded = True
-            e += 1
-        if not readded:
-            growth_order.append(new_action)
+        # Zeit für ausgeführte Aktion zurücksetzten
+        growth_order[0]["time"] = crystals[growth_order[0]["crystal_index"]].get_value(growth_order[0]["direction"])
 
+        # Sortieren
         sorted(growth_order, key=lambda x: x["time"])
 
         print(str(round((i / iterations) * 100 * 10) / 10) + "%")
