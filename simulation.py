@@ -2,6 +2,8 @@ import copy
 import random
 from PIL import Image
 
+SIZE_X = 500
+SIZE_Y = 500
 
 class Crystal:
     def __init__(self):
@@ -31,6 +33,10 @@ def clamp(value, low, high):
         return value
 
 
+def eval(x):
+    return x["time"]
+
+
 def mk_matrix(size_x, size_y, init=-1):
     matrix = []
     for x in range(size_x):
@@ -58,7 +64,7 @@ def calculate_growth_order(crystals):
         order.append({"time": crystal.get_value("right"), "direction": "right", "crystal_index": i})
         order.append({"time": crystal.get_value("down"), "direction": "down", "crystal_index": i})
         order.append({"time": crystal.get_value("left"), "direction": "left", "crystal_index": i})
-    sorted(order, key=lambda x: x["time"])
+    order.sort(key=eval)
     return order
 
 
@@ -104,6 +110,32 @@ def grow(index, direction, crystal_map: []):
     return new_map
 
 
+def quick_grow(index, direction, crystal_map):
+    offset_x, offset_y = 0, 0
+    if direction == "up":
+        offset_x, offset_y = 0, 1
+    elif direction == "right":
+        offset_x, offset_y = 1, 0
+    elif direction == "down":
+        offset_x, offset_y = 0, -1
+    elif direction == "left":
+        offset_x, offset_y = -1, 0
+
+    growing_crystals = []
+    for x in range(SIZE_X):
+        for y in range(SIZE_Y):
+            if crystal_map[x][y] == index:
+                growing_crystals.append({"x": x, "y": y})
+
+    for crystal in growing_crystals:
+        goal_field_x = clamp(crystal["x"] + offset_x, 0, SIZE_X - 1)
+        goal_field_y = clamp(crystal["y"] + offset_y, 0, SIZE_Y - 1)
+        if crystal_map[goal_field_x][goal_field_y] == -1:
+            crystal_map[goal_field_x][goal_field_y] = index
+
+    return crystal_map
+
+
 def simulate(size_x=500, size_y=500, crystal_amount=50, iterations=1000):
     crystal_map = mk_matrix(size_x, size_y, -1)
 
@@ -114,20 +146,25 @@ def simulate(size_x=500, size_y=500, crystal_amount=50, iterations=1000):
 
     for i in range(iterations):
         # Wachstumsaktion durchführen
-        crystal_map = grow(growth_order[0]["crystal_index"], growth_order[0]["direction"], crystal_map)
+        for action in growth_order:
+            if action["time"] == growth_order[0]["time"]:
+                crystal_map = quick_grow(action["crystal_index"], action["direction"], crystal_map)
 
-        # Zeit aktueller Aktion von allen anderen abziehen
-        for e in range(len(growth_order)):
-            growth_order[e]["time"] = growth_order[e]["time"] - growth_order[0]["time"]
+                # Zeit aktueller Aktion von allen anderen abziehen
+                for e in range(len(growth_order)):
+                    growth_order[e]["time"] = growth_order[e]["time"] - action["time"]
 
-        # Zeit für ausgeführte Aktion zurücksetzten
-        growth_order[0]["time"] = crystals[growth_order[0]["crystal_index"]].get_value(growth_order[0]["direction"])
+                # Zeit für ausgeführte Aktion zurücksetzten
+                action["time"] = crystals[action["crystal_index"]].get_value(action["direction"])
+                print(action["time"])
 
         # Sortieren
-        sorted(growth_order, key=lambda x: x["time"])
+        # growth_order = sorted(growth_order, key=lambda x: x["time"])
+        growth_order.sort(key=eval)
 
         print(str(round((i / iterations) * 100 * 10) / 10) + "%")
 
+    # Bild erstellen
     img = Image.new('RGB', (size_x, size_y), "black")
     pixels = img.load()
     for f in range(img.size[0]):
@@ -138,4 +175,4 @@ def simulate(size_x=500, size_y=500, crystal_amount=50, iterations=1000):
 
 
 if __name__ == "__main__":
-    simulate(size_x=500, size_y=500, crystal_amount=50, iterations=10000)
+    simulate(size_x=500, size_y=500, crystal_amount=50, iterations=1000)
