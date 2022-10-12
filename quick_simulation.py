@@ -2,8 +2,8 @@ import copy
 import random
 from PIL import Image
 
-SIZE_X = 50
-SIZE_Y = 50
+SIZE_X = 200
+SIZE_Y = 200
 MIN_TIME = 50
 MAX_TIME = 100
 
@@ -64,7 +64,7 @@ def filled(crystal_map):
     amount = 0
     for row in crystal_map:
         for i in row:
-            if i is None:
+            if i is not None:
                 amount += 1
     return amount - (SIZE_X*SIZE_Y)
 
@@ -113,8 +113,8 @@ def subtract_time(crystal_map, subtraction_time):
             if crystal is not None:
                 for time, i in zip(crystal["current_times"], range(4)):
                     crystal["current_times"][i] -= subtraction_time
-                    if crystal["current_times"][i] == 0:
-                        crystal["current_times"][i] += crystal["max_times"][i]
+                    if time == 0:
+                        crystal["current_times"][i] = crystal["max_times"][i]
 
 
 def simulate():

@@ -33,6 +33,16 @@ def clamp(value, low, high):
         return value
 
 
+def render(crystal_map, name):
+    img = Image.new('RGB', (SIZE_X, SIZE_Y), "black")
+    pixels = img.load()
+    for f in range(img.size[0]):
+        for j in range(img.size[1]):
+            v = clamp(crystal_map[f - 1][j - 1] * 5, 0, 255)
+            pixels[f - 1, j - 1] = (v, v, v)
+    img.save(tr(name) + ".png")
+
+
 def is_clamp(value, low, high):
     return value > high or value < low
 
@@ -138,13 +148,7 @@ def simulate(crystal_amount=50, iterations=1000):
         print(str(round((i / iterations) * 100 * 10) / 10) + "%")
 
     # Bild erstellen
-        img = Image.new('RGB', (SIZE_X, SIZE_Y), "black")
-        pixels = img.load()
-        for f in range(img.size[0]):
-            for j in range(img.size[1]):
-                v = clamp(crystal_map[f - 1][j - 1] * 5, 0, 255)
-                pixels[f - 1, j - 1] = (v, v, v)
-        img.save("test" + str(i) + ".png")
+    render(crystal_map, 0)
 
 
 if __name__ == "__main__":
