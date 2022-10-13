@@ -7,6 +7,17 @@ SIZE_Y = 200
 TIME = 0
 
 
+def render(crystals, name):
+    img = Image.new('RGB', (SIZE_X, SIZE_Y), "black")
+    pixels = img.load()
+    for crystal in crystals:
+        pos = crystal["position"]
+        v = crystal["color"]
+        pixels[pos[0], pos[0]] = (v, v, v)
+    img.save(str(name) + ".png")
+    print("save")
+
+
 class GrowthEvent:
     def __init__(self, time_offsets: [], time: int, direction: int, position: [], color: int):
         self.time_offsets: [] = time_offsets
@@ -33,8 +44,9 @@ class GrowthEvent:
 
 
 if __name__ == "__main__":
-    EVENTS.append(GrowthEvent(time_offsets=[10, 5, 7, 8], time=0, direction=1, position=[0, 0], color=1))
+    EVENTS.append(GrowthEvent(time_offsets=[10, 5, 7, 8], time=0, direction=1, position=[0, 0], color=200))
     EVENTS[0].fire(0)
 
-    print(CRYSTALS, EVENTS)
+    print("success")
+    render(CRYSTALS, 0)
 

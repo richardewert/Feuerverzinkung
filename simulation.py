@@ -1,8 +1,8 @@
 import random
 from PIL import Image
 
-SIZE_X = 200
-SIZE_Y = 200
+SIZE_X = 50
+SIZE_Y = 50
 
 
 class Crystal:
