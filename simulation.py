@@ -40,7 +40,7 @@ def render(crystal_map, name):
         for j in range(img.size[1]):
             v = clamp(crystal_map[f - 1][j - 1] * 5, 0, 255)
             pixels[f - 1, j - 1] = (v, v, v)
-    img.save(tr(name) + ".png")
+    img.save(str(name) + ".png")
 
 
 def is_clamp(value, low, high):
