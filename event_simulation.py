@@ -1,21 +1,46 @@
-from PIL import Image
+import logging
+import random
 
-EVENTS = []
-CRYSTALS = []
-SIZE_X = 200
-SIZE_Y = 200
-TIME = 0
+import numpy as np
+from PIL import Image
+from numpy import array
+
+events = []
+size_x = 200
+size_y = 200
+crystal_image = np.zeros((size_y, size_x))
+simulated_pixels = 0
+
+
+def init_events(amount=50, min_time=50, max_time=100):
+    new_events = []
+    used_positions = []
+    for i in range(amount):
+        position = [random.randint(0, size_y - 1), random.randint(0, size_x - 1)]
+        while position in used_positions:
+            position = [random.randint(0, size_y - 1), random.randint(0, size_x - 1)]
+        used_positions.append(position)
+        time_offsets = [
+            random.randint(min_time, max_time),
+            random.randint(min_time, max_time),
+            random.randint(min_time, max_time),
+            random.randint(min_time, max_time)
+        ]
+        new_events.append(GrowthEvent(time_offsets=time_offsets, time=0, direction=0, position=position,
+                                      color=random.randint(50, 255)))
+    return new_events
 
 
 def render(crystals, name):
-    img = Image.new('RGB', (SIZE_X, SIZE_Y), "black")
-    pixels = img.load()
-    for crystal in crystals:
-        pos = crystal["position"]
-        v = crystal["color"]
-        pixels[pos[0], pos[0]] = (v, v, v)
-    img.save(str(name) + ".png")
-    print("save")
+    im = array(crystals)
+    Image.fromarray(im).show()
+    # img = Image.new('RGB', (SIZE_X, SIZE_Y), "black")
+    # pixels = img.load()
+    # for x in range(len(crystals)):
+    #     for y in range(len(crystals[x])):
+    #         v = crystals[x][y]
+    #         pixels[x, y] = (v, v, v)
+    # img.save(str(name) + ".png")
 
 
 class GrowthEvent:
@@ -25,28 +50,28 @@ class GrowthEvent:
         self.position: [] = position
         self.color: int = color
 
-    def fire(self, i: int):
-        if not any(d["position"] == self.position for d in CRYSTALS):
-            CRYSTALS.append({"position": self.position, "color": self.color})
 
-            positions = [
-                [self.position[0] + 0, self.position[1] + 1],
-                [self.position[0] + 0, self.position[1] + -1],
-                [self.position[0] + 1, self.position[1] + 0],
-                [self.position[0] + -1, self.position[1] + 0]
-            ]
-            for position, direction in zip(positions, range(4)):
-                if not any(d["position"] == position for d in CRYSTALS):
-                    EVENTS.append(GrowthEvent(self.time_offsets, self.time, direction, position, self.color))
-            EVENTS.sort(key=lambda x: x.time)
-        if i <= 979:
-            EVENTS[EVENTS.index(self) + 1].fire(i + 1)
+def fire(event):
+    if crystal_image[event.position[0]][event.position[1]] == 0:
+        crystal_image[event.position[0]][event.position[1]] = event.color
+
+        positions = [
+            [event.position[0] + 0, event.position[1] + 1],
+            [event.position[0] + 0, event.position[1] + -1],
+            [event.position[0] + 1, event.position[1] + 0],
+            [event.position[0] + -1, event.position[1] + 0]
+        ]
+        for position, direction in zip(positions, range(4)):
+            if size_x > position[0] >= 0 and size_y > position[1] >= 0:
+                if crystal_image[position[0]][position[1]] == 0:
+                    events.append(GrowthEvent(event.time_offsets, event.time, direction, position, event.color))
 
 
 if __name__ == "__main__":
-    EVENTS.append(GrowthEvent(time_offsets=[10, 5, 7, 8], time=0, direction=1, position=[0, 0], color=200))
-    EVENTS[0].fire(0)
+    events = init_events()
+    while len(events) > 0:
+        fire(events.pop(0))
+        events.sort(key=lambda x: x.time)
+        logging.debug(crystal_image)
 
-    print("success")
-    render(CRYSTALS, 0)
-
+    render(crystal_image, "result")
