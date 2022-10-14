@@ -1,15 +1,16 @@
 import logging
 import random
+from tqdm import tqdm
 
 import numpy as np
 from PIL import Image
 from numpy import array
 
 events = []
-size_x = 200
-size_y = 200
+size_x = 1000
+size_y = 1000
 crystal_image = np.zeros((size_y, size_x))
-simulated_pixels = 0
+simulated_pixels = 10
 
 
 def init_events(amount=50, min_time=50, max_time=100):
@@ -54,6 +55,8 @@ class GrowthEvent:
 def fire(event):
     if crystal_image[event.position[0]][event.position[1]] == 0:
         crystal_image[event.position[0]][event.position[1]] = event.color
+        global simulated_pixels
+        simulated_pixels += 1
 
         positions = [
             [event.position[0] + 0, event.position[1] + 1],
@@ -64,14 +67,18 @@ def fire(event):
         for position, direction in zip(positions, range(4)):
             if size_x > position[0] >= 0 and size_y > position[1] >= 0:
                 if crystal_image[position[0]][position[1]] == 0:
-                    events.append(GrowthEvent(event.time_offsets, event.time, direction, position, event.color))
+                    events.insert(0, GrowthEvent(event.time_offsets, event.time, direction, position, event.color))
 
 
 if __name__ == "__main__":
     events = init_events()
-    while len(events) > 0:
-        fire(events.pop(0))
-        events.sort(key=lambda x: x.time)
-        logging.debug(crystal_image)
+    for i in tqdm(range(size_x * size_y)):
+        old_simulated = simulated_pixels
+        while simulated_pixels <= old_simulated:
+            events.sort(key=lambda x: x.time)
+            fire(events.pop(0))
+            logging.debug(crystal_image)
+            # if simulated_pixels % 100 == 0:
+            #     print(f"progress: {round((simulated_pixels / i) * 100)}%, events: {len(events)}")
 
     render(crystal_image, "result")
