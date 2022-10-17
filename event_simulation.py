@@ -17,6 +17,22 @@ crystal_image = np.zeros((size_y, size_x))
 simulated_pixels = 0
 
 
+class GrowthEvent:
+    def __init__(self, time_offsets: [], time: float, position: [], color: int) -> None:
+        """
+        Initialisiert einen neues Kristallwachstumsevent
+
+        :param time_offsets: Ein Array mit 4 Werten, für jede Richtung einen, mit der jeweiligen Zeit zwischen den Wachstumschritten
+        :param time: Der Zeitpunkt, zu dem das Event eintreten soll
+        :param position: die Position, die vom Event verändert werden soll
+        :param color: die Farbe, die der Kristall haben soll
+        """
+        self.time_offsets: [] = time_offsets
+        self.time: float = time
+        self.position: [] = position
+        self.color: int = color
+
+
 def init_events(amount=50, min_time=50, max_time=100) -> []:
     """
     Initialisiert die ersten Kristalle in Form von Wachstumsevents
@@ -44,7 +60,6 @@ def init_events(amount=50, min_time=50, max_time=100) -> []:
         ]
         # Eine Farbe für den Kristall festlegen, das Objekt erstellen und in die Liste einfügen.
         new_events.append(GrowthEvent(time_offsets=time_offsets, time=0, position=position, color=random.randint(50, 255)))
-    new_events.sort(key=lambda x: x.time)
     return new_events
 
 
@@ -60,22 +75,6 @@ def render(crystals: array, name: any = "result") -> None:
     im = im.convert("L")            # Farbraum festlegen
     im.show()                       # Bild anzeigen
     im.save(str(name) + ".png")     # Bild abspeichern
-
-
-class GrowthEvent:
-    def __init__(self, time_offsets: [], time: int, position: [], color: int) -> None:
-        """
-        Initialisiert einen neues Kristallwachstumsevent
-
-        :param time_offsets: Ein Array mit 4 Werten, für jede Richtung einen, mit der jeweiligen Zeit zwischen den Wachstumschritten
-        :param time: Der Zeitpunkt, zu dem das Event eintreten soll
-        :param position: die Position, die vom Event verändert werden soll
-        :param color: die Farbe, die der Kristall haben soll
-        """
-        self.time_offsets: [] = time_offsets
-        self.time: int = time
-        self.position: [] = position
-        self.color: int = color
 
 
 def fire(event: GrowthEvent) -> None:
@@ -113,6 +112,6 @@ if __name__ == "__main__":
     for i in tqdm(range(size_x * size_y)):                  # Für die Menge an Pixeln im Bild (nötig für Fortschrittsanzeige)
         old_simulated = simulated_pixels
         while simulated_pixels <= old_simulated:            # Solange es keine Veränderung im Bild gibt
-            fire(events.pop(0))                             # Wird das unterste Event, also das mit der geringsten Zeit, ausgeführt
+            fire(events.pop(0))                             # Wird das unterste Event, also das mit der geringsten Zeit, ausgeführt und aus der Liste entfernt
 
     render(crystal_image, "result")
