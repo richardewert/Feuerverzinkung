@@ -10,6 +10,8 @@
 
 ---
 ## Lösungsidee
+Die Simulation basiert auf "Wachstumsevents". 
+Sie stellen dar wann und wohin ein Kristall wächst.
 Die Simulation schreitet nur dann fort, wenn es durch ein Event ausgelöst wird,
 um keine unnötigen Schritte zu berechnen.
 Die Events haben einen Zeitpunkt, zu welchem sie eintreten.
