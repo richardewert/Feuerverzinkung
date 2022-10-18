@@ -11,6 +11,8 @@ events = collections.deque()
 # Größe der Simulation und des resultierenden Bildes
 size_x = 250
 size_y = 250
+# Anzahl an Kristallen wird auf 1 pro 100 pixel festgelegt
+cristal_amount = round(size_x*size_y/100)
 # Numpy Array mit der richtigen größe, enthält Kristall Farben
 crystal_image = np.zeros((size_y, size_x))
 # Anzahl der bereits von Kristallen gefüllten Pixel, nötig für Fortschrittsanzeige
@@ -108,10 +110,10 @@ def fire(event: GrowthEvent) -> None:
 
 
 if __name__ == "__main__":
-    events = init_events(amount=round(size_x*size_y/1000))  # Seed-Kristalle werden initialsiert
+    events = init_events(amount=cristal_amount)  # Seed-Kristalle werden initialsiert
     for i in tqdm(range(size_x * size_y)):                  # Für die Menge an Pixeln im Bild (nötig für Fortschrittsanzeige)
         old_simulated = simulated_pixels
         while simulated_pixels <= old_simulated:            # Solange es keine Veränderung im Bild gibt
             fire(events.pop(0))                             # Wird das unterste Event, also das mit der geringsten Zeit, ausgeführt und aus der Liste entfernt
 
-    render(crystal_image, "result")
+    render(crystal_image, f"x{size_x}y{size_y}a{cristal_amount}" + f"_{0}")
