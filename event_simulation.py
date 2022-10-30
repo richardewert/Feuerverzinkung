@@ -110,7 +110,7 @@ def fire(event: GrowthEvent) -> None:
 
 
 if __name__ == "__main__":
-    events = init_events(amount=cristal_amount)  # Seed-Kristalle werden initialsiert
+    events = init_events(amount=cristal_amount)  # Seed-Kristalle werden initialisiert
     for i in tqdm(range(size_x * size_y)):                  # Für die Menge an Pixeln im Bild (nötig für Fortschrittsanzeige)
         old_simulated = simulated_pixels
         while simulated_pixels <= old_simulated:            # Solange es keine Veränderung im Bild gibt

@@ -40,10 +40,10 @@ Es enthält alle informationen die für ein Wachstum wichtig sind:
 - `time_offsets` Ein Array mit 4 Werten, für jede Richtung einen, mit der jeweiligen Zeit zwischen den Wachstumschritten
 - `time` Der Zeitpunkt zu dem das Event ausgeführt werden soll
 - `position` die Position, welche vom Event verändert werden soll
-- `color` die Farbe es Kristalls, welcher wächst
+- `color` die Farbe des Kristalls, welcher wächst
 
 Die `events` Liste wird zu begin auf die von der `init_events()` Funktion erstellten Events initialisiert.
-Diese Funktion erstellt einfach eine bestimmte Anzahl an `GrowthEvents` mit zufälligen Werten und gibt sie als Liste zurück. 
+Diese Funktion erstellt eine bestimmte Anzahl an `GrowthEvents` mit zufälligen Werten und gibt sie als Liste zurück. 
 Nur der `time` Wert wird auf 0 Initialisiert.
 
 ```events = init_events(amount=round(size_x*size_y/1000))```
