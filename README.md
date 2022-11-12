@@ -49,16 +49,20 @@ Nur der `time` Wert wird auf 0 Initialisiert.
 ```events = init_events(amount=round(size_x*size_y/1000))```
 
 Damit die Fortschrittsanzeige funktionieren kann benötigt sie eine feste Anzahl an Wiederholungen und einen eine
-aktuelle Iteration. Deshalb wird der folgende Teil für jedes Pixel des zu erstellendes Bildes so oft wiederholt bis ein Pixel 
-verändert wurde: Das unterste `GrowthEvent` in der `events` Liste wird der `fire()` Funktion übergeben und im selben Schritt
-aus der Liste entfernt.
+aktuelle Iteration. Deshalb wird der folgende Teil für jedes Pixel des zu erstellendes Bildes so oft wiederholt bis ein 
+Pixel verändert wurde: Das unterste `GrowthEvent` in der `events` Liste wird der `fire()` Funktion übergeben und im 
+selben Schritt aus der Liste entfernt.
 
 ```
-events = init_events(amount=round(size_x*size_y/1000))  # Seed-Kristalle werden initialsiert
-    for i in tqdm(range(size_x * size_y)):                  # Für die Menge an Pixeln im Bild (nötig für Fortschrittsanzeige)
+# Seed-Kristalle werden initialsiert
+events = init_events(amount=round(size_x*size_y/1000))  
+    # Für die Menge an Pixeln im Bild (nötig für Fortschrittsanzeige)
+    for i in tqdm(range(size_x * size_y)):                  
         old_simulated = simulated_pixels
-        while simulated_pixels <= old_simulated:            # Solange es keine Veränderung im Bild gibt
-            fire(events.pop(0))                             # Wird das unterste Event, also das mit der geringsten Zeit, ausgeführt und aus der Liste entfernt  
+        # Solange es keine Veränderung im Bild gibt
+        while simulated_pixels <= old_simulated:            
+            # Wird das unterste Event, also das mit der geringsten Zeit, ausgeführt und aus der Liste entfernt
+            fire(events.pop(0))                             
 ```
 
 Die `fire()` Funktion prüft, ob an dieser Stelle nicht schon ein Kristall existiert.
@@ -80,19 +84,24 @@ Liste hinzugefügt.
             [event.position[0] + 1, event.position[1] + 0],
             [event.position[0] + -1, event.position[1] + 0]
         ]
-        for position, direction in zip(positions, range(4)):                # Jede dieser Positionen
-            if size_y > position[0] >= 0 and size_x > position[1] >= 0:     # wird, falls sie innerhalb der Simulation liegen,
-                if crystal_image[position[0]][position[1]] == 0:            # und noch nicht belegt sind
-                    new_event = GrowthEvent(event.time_offsets, event.time + event.time_offsets[direction], position, event.color)
-                    events.append(new_event)                                # als Teil eines neuen Events in die Event-Liste geschrieben
+        # Jede dieser Positionen
+        for position, direction in zip(positions, range(4)):                
+            # wird, falls sie innerhalb der Simulation liegen,
+            if size_y > position[0] >= 0 and size_x > position[1] >= 0:     
+                # und noch nicht belegt sind
+                if crystal_image[position[0]][position[1]] == 0:            
+                    new_event = GrowthEvent(event.time_offsets, event.time + \
+                    event.time_offsets[direction], position, event.color)
+                    # als Teil eines neuen Events in die Event-Liste geschrieben
+                    events.append(new_event)                                
 ```
 Die entstehenden Events werden bestimmt, indem zuerst eine Liste aller neu entstehenden Positionen erstellt wird.
 Das sind eben die Position des aktuellen Events, plus ein entsprechendes offset für jede der 4 Richtungen.
-Die Positionen werden nun darauf geprüft, ob sie innerhalb der Simulation sind und keine Stelle, die schon einen Kristall
-besitzt, verändern. Wenn all das zutrifft, wird ein neues `GrowthEvent` mit demselben `time_offsets`, `position` und `color`
-der `events` Liste hinzugefügt.
-Nur der Eintrittszeitpunkt wird verändert. Der Eintrittszeitpunkt des neuen Events entspricht dem Eintrittszeitpunkt 
-des aktuellen Events plus, dem der Richtung entsprechenden Eintrag in `time_offsets`.
+Die Positionen werden nun darauf geprüft, ob sie innerhalb der Simulation sind und keine Stelle, die schon einen 
+Kristall besitzt, verändern. Wenn all das zutrifft, wird ein neues `GrowthEvent` mit demselben `time_offsets`, 
+`position` und `color`der `events` Liste hinzugefügt. Nur der Eintrittszeitpunkt wird verändert. Der Eintrittszeitpunkt 
+des neuen Events entspricht dem Eintrittszeitpunkt des aktuellen Events plus, dem der Richtung entsprechenden Eintrag 
+in `time_offsets`.
 
 Wenn alle neuen Events hinzugefügt wurden, wird die `events` Liste nach dem `time` Wert sortiert, 
 damit immer das erst auftretende Event ausgeführt wird.
@@ -105,21 +114,29 @@ events.sort(key=lambda x: x.time)   # Die Event-Liste wird nach Zeit sortiert
 ## Beispiele
 Unterschiedliche 250*250 Pixel große Bilder mit im Durchschnitt 1000 Pixel großen Kristallen:
 
-: ![](x250y250a62_0.png) ![](x250y250a62_1.png)
-: ![](x250y250a62_2.png) ![](x250y250a62_3.png)
+![](x250y250a62_0.png) ![](x250y250a62_1.png)
+
+![](x250y250a62_2.png) ![](x250y250a62_3.png)
 
 Ein 500*500 Pixel großes Bild mit im Durchschnitt 100 Pixel großen Kristallen:
-: ![](x500y500a2500_0.png) 
+
+![](x500y500a2500_0.png) 
 
 Unterschiedliche 50*50 Pixel große Bilder mit im Durchschnitt 100 Pixel großen Kristallen:
-: ![](x50y50a25_0.png) ![](x50y50a25_1.png) ![](x50y50a25_2.png) ![](x50y50a25_3.png) ![](x50y50a25_4.png) 
-: ![](x50y50a25_5.png) ![](x50y50a25_6.png) ![](x50y50a25_7.png) ![](x50y50a25_8.png) ![](x50y50a25_9.png) 
-: ![](x50y50a25_10.png) ![](x50y50a25_11.png) ![](x50y50a25_12.png) ![](x50y50a25_13.png) ![](x50y50a25_14.png) 
-: ![](x50y50a25_15.png) ![](x50y50a25_16.png) ![](x50y50a25_17.png) ![](x50y50a25_18.png) ![](x50y50a25_19.png) 
-: ![](x50y50a25_20.png) ![](x50y50a25_21.png) ![](x50y50a25_22.png) ![](x50y50a25_23.png) ![](x50y50a25_24.png) 
+
+![](x50y50a25_0.png) ![](x50y50a25_1.png) ![](x50y50a25_2.png) ![](x50y50a25_3.png) ![](x50y50a25_4.png) 
+
+![](x50y50a25_5.png) ![](x50y50a25_6.png) ![](x50y50a25_7.png) ![](x50y50a25_8.png) ![](x50y50a25_9.png) 
+
+![](x50y50a25_10.png) ![](x50y50a25_11.png) ![](x50y50a25_12.png) ![](x50y50a25_13.png) ![](x50y50a25_14.png) 
+
+![](x50y50a25_15.png) ![](x50y50a25_16.png) ![](x50y50a25_17.png) ![](x50y50a25_18.png) ![](x50y50a25_19.png) 
+
+![](x50y50a25_20.png) ![](x50y50a25_21.png) ![](x50y50a25_22.png) ![](x50y50a25_23.png) ![](x50y50a25_24.png) 
 
 Ein 250*250 Pixel großes Bild mit im Durchschnitt 100 Pixel großen Kristallen:
-: ![](x250y250a625_0.png) 
+
+![](x250y250a625_0.png) 
 
 ---
 ## Quellcode
@@ -147,21 +164,26 @@ def fire(event: GrowthEvent) -> None:
             [event.position[0] + 1, event.position[1] + 0],
             [event.position[0] + -1, event.position[1] + 0]
         ]
-        for position, direction in zip(positions, range(4)):                # Jede dieser Positionen
-            if size_y > position[0] >= 0 and size_x > position[1] >= 0:     # wird, falls sie innerhalb der Simulation liegen,
-                if crystal_image[position[0]][position[1]] == 0:            # und noch nicht belegt sind
-                    new_event = GrowthEvent(event.time_offsets, event.time + event.time_offsets[direction], position, event.color)
-                    events.append(new_event)                                # als Teil eines neuen Events in die Event-Liste geschrieben
-        events.sort(key=lambda x: x.time)   # Die Event-Liste wird nach Zeit sortiert
+        # Jede dieser Positionen
+        for position, direction in zip(positions, range(4)):                
+            # wird, falls sie innerhalb der Simulation liegen,
+            if size_y > position[0] >= 0 and size_x > position[1] >= 0:     
+                # und noch nicht belegt sind
+                if crystal_image[position[0]][position[1]] == 0:            
+                    new_event = GrowthEvent(event.time_offsets, event.time + \
+                    event.time_offsets[direction], position, event.color)
+                    # als Teil eines neuen Events in die Event-Liste geschrieben
+                    events.append(new_event)   
 ```
 
 ```
-if __name__ == "__main__":
-    events = init_events(amount=cristal_amount)  # Seed-Kristalle werden initialsiert
-    for i in tqdm(range(size_x * size_y)):                  # Für die Menge an Pixeln im Bild (nötig für Fortschrittsanzeige)
+# Seed-Kristalle werden initialsiert
+events = init_events(amount=round(size_x*size_y/1000))  
+    # Für die Menge an Pixeln im Bild (nötig für Fortschrittsanzeige)
+    for i in tqdm(range(size_x * size_y)):                  
         old_simulated = simulated_pixels
-        while simulated_pixels <= old_simulated:            # Solange es keine Veränderung im Bild gibt
-            fire(events.pop(0))                             # Wird das unterste Event, also das mit der geringsten Zeit, ausgeführt und aus der Liste entfernt
-
-    render(crystal_image, f"x{size_x}y{size_y}a{cristal_amount}" + f"_{0}")
+        # Solange es keine Veränderung im Bild gibt
+        while simulated_pixels <= old_simulated:            
+            # Wird das unterste Event, also das mit der geringsten Zeit, ausgeführt und aus der Liste entfernt
+            fire(events.pop(0))   
 ```
